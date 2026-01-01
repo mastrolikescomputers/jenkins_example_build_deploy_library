@@ -47,6 +47,13 @@ This repository contains a collection of generic Jenkins pipeline scripts design
 
 This pipeline runs Terraform to manage your infrastructure.
 
+**Parameters:**
+
+*   `terraformDir`: The directory containing your Terraform files (`.tf`).
+*   `environment`: The name of the environment to apply changes to. This will be used to select the appropriate `.tfvars` and `.tfbackend` files (e.g., `staging.tfvars`).
+*   `action`: The Terraform action to perform. Can be `plan`, `apply`, or `destroy`.
+*   `awsCredentialsId`: The ID of the Jenkins credentials to use for authenticating with AWS. This should be a "String" credential containing your AWS secret key ID.
+
 **Example:**
 
 ```groovy
@@ -54,13 +61,21 @@ terraformPipeline(
     terraformDir: 'infra/aws',       // Directory with .tf files
     environment: 'staging',          // .tfvars and .tfbackend file to use
     action: 'apply',                 // 'plan', 'apply', or 'destroy'
-    awsCredentialsId: 'aws-creds'    // Jenkins credentials for AWS
+    awsCredentialsId: 'your-aws-credentials-id'    // Jenkins credentials for AWS
 )
 ```
 
 ### `ansiblePipeline`
 
 This pipeline runs Ansible playbooks to configure servers or deploy applications.
+
+**Parameters:**
+
+*   `ansibleDir`: The directory containing your Ansible playbook.
+*   `playbook`: The name of the playbook to run.
+*   `inventory`: The name of the inventory file to use.
+*   `credentialsId`: The ID of the Jenkins SSH credentials to use for connecting to the target servers. This should be a "SSH Username with private key" credential.
+*   `extraVars`: A map of extra variables to pass to the playbook.
 
 **Example:**
 
@@ -69,7 +84,7 @@ ansiblePipeline(
     ansibleDir: 'ansible',                  // Directory with playbook
     playbook: 'deploy.yml',                 // Playbook to run
     inventory: 'hosts.staging',             // Inventory file
-    credentialsId: 'ssh-private-key',       // SSH credentials
+    credentialsId: 'your-ssh-credentials-id', // SSH credentials
     extraVars: [app_version: '1.2.3']       // Extra variables for playbook
 )
 ```
@@ -78,18 +93,33 @@ ansiblePipeline(
 
 This pipeline builds projects using various build tools.
 
+**Parameters:**
+
+*   `buildTool`: The build tool to use. Supported values are `dotnet`, `python`, and `msbuild`.
+*   `projectPath`: The path to the project or solution file.
+*   `requirementsPath`: (Optional) The path to the `requirements.txt` file for Python builds. Defaults to `requirements.txt`.
+
 **Example:**
 
 ```groovy
 buildPipeline(
-    buildTool: 'dotnet',              // 'dotnet', 'python', or 'msbuild'
-    projectPath: 'my-dotnet-app/'     // Path to project/solution
+    buildTool: 'python',              // 'dotnet', 'python', or 'msbuild'
+    projectPath: 'my-python-app/',     // Path to project/solution
+    requirementsPath: 'my-python-app/requirements.txt'
 )
 ```
 
 ### `runTests`
 
 This pipeline clones a test repository and runs automated tests.
+
+**Parameters:**
+
+*   `testRepoUrl`: The URL of the Git repository containing the tests.
+*   `testRepoBranch`: The branch to clone from the test repository.
+*   `credentialsId`: The ID of the Jenkins credentials to use for cloning the test repository.
+*   `testFramework`: The test framework to use. Supported values are `pytest`, `mstest`, and `nunit`.
+*   `requirementsPath`: (Optional) The path to the `requirements.txt` file for Python-based tests. Defaults to `requirements.txt`.
 
 **Example:**
 
@@ -98,6 +128,7 @@ runTests(
     testRepoUrl: 'https://github.com/my-org/my-tests.git',
     testRepoBranch: 'develop',
     credentialsId: 'git-credentials',
-    testFramework: 'pytest'            // 'pytest', 'mstest', 'nunit'
+    testFramework: 'pytest',            // 'pytest', 'mstest', 'nunit'
+    requirementsPath: 'tests/requirements.txt'
 )
 ```
